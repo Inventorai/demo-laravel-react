@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+#
+# Blocks a push when the shared Laravel backend has drifted from the React demo.
+#
+# The two demos are one application behind two frontends: only resources/js/,
+# app.blade.php and the frontend build config differ. Backend changes are
+# authored in this repo and pushed across with bin/sync-backend.sh, and this
+# hook is what stops a push that would leave the two out of step.
+#
+# Enable it with:  git config core.hooksPath .githooks
+
+set -euo pipefail
+
+# This hook is itself synced into the React demo, where it must do nothing:
+# sync only ever runs Vue -> React. The Vue repo is the one with app.ts.
+[[ -f resources/js/app.ts ]] || exit 0
+
+# Nothing to compare against if the sibling repo isn't checked out here.
+[[ -d ../InventoraiSdkDemoReact ]] || exit 0
+
+if ! ./bin/sync-backend.sh --check; then
+    echo "Push blocked: sync the backends before pushing." >&2
+    exit 1
+fi

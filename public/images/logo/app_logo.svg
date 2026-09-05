@@ -1,0 +1,16 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Inventorai">
+  <defs>
+    <linearGradient id="appLogoGradient" x1="8" y1="6" x2="56" y2="58" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#34D399"/>
+      <stop offset="0.55" stop-color="#10B981"/>
+      <stop offset="1" stop-color="#059669"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="url(#appLogoGradient)"/>
+  <path
+    fill="#FFFFFF"
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M32 15 L51 31 V48 a1 1 0 0 1 -1 1 H14 a1 1 0 0 1 -1 -1 V31 Z M27 49 V41 a5 5 0 0 1 10 0 V49 Z"
+  />
+</svg>
