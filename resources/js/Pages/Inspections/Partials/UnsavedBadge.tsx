@@ -1,8 +1,8 @@
 /**
  * Marks edits that exist only in the browser until their Save button is used.
  *
- * Nothing on this page saves as you type — every record type posts to its own
- * SDK endpoint on demand — and an accordion can hide a pending edit behind a
+ * Nothing on this page saves as you type. Every record type posts to its own
+ * SDK endpoint on demand. And an accordion can hide a pending edit behind a
  * closed panel, so the count is surfaced on the trigger as well as in place.
  */
 import { cn } from '@/lib/utils';

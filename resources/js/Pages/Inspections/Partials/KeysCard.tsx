@@ -1,5 +1,5 @@
 /**
- * Keys and fobs — Inventorai::keysFobs().
+ * Keys and fobs: Inventorai::keysFobs().
  *
  * A typed count of what was handed over. `quantity` is what matters at
  * check-in/check-out time, so the total across every row is shown up front.

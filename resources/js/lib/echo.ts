@@ -6,7 +6,7 @@ let echo: Echo<'reverb'> | null = null;
   * Creates a singleton Echo instance connected to Inventorai's Reverb server.
  *
  * Connection config comes from the app's own Vite env (VITE_REVERB_*),
- * which mirror the REVERB_* values in .env — the same Reverb instance the
+ * which mirror the REVERB_* values in .env, the same Reverb instance the
  * Inventorai API broadcasts on. No `token()` call is needed for this.
  *
  * Broadcasting auth is proxied through /broadcasting/auth so the Inventorai

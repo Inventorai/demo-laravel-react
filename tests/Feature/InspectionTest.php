@@ -115,7 +115,7 @@ test('inspections page redirects with error on API failure', function () {
 /**
  * The show page and the records that hang off an inspection.
  *
- * Reads are one call — everything the page needs comes back through
+ * Reads are one call: everything the page needs comes back through
  * `include`. Writes are the opposite: each record type has its own SDK
  * resource, and the app's routes wrap one SDK method each.
  */

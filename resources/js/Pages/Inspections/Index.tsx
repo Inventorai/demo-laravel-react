@@ -261,14 +261,14 @@ export default function Index({
                                                                 )}
                                                             </TableCell>
                                                             <TableCell>
-                                                                <div className="font-medium">{inspection.property?.address?.line_1 ?? '—'}</div>
+                                                                <div className="font-medium">{inspection.property?.address?.line_1 ?? 'Not set'}</div>
                                                                 <div className="text-xs text-muted-foreground">
                                                                     {[inspection.property?.address?.city, inspection.property?.address?.postcode].filter(Boolean).join(', ')}
                                                                 </div>
                                                             </TableCell>
                                                             <TableCell>
                                                                 <Badge variant="outline" className="capitalize">
-                                                                    {humanize(inspection.type ?? '—')}
+                                                                    {humanize(inspection.type ?? 'Not set')}
                                                                 </Badge>
                                                             </TableCell>
                                                             <TableCell>
@@ -276,18 +276,18 @@ export default function Index({
                                                                     variant={inspection.status === 'completed' ? 'default' : 'secondary'}
                                                                     className="capitalize"
                                                                 >
-                                                                    {humanize(inspection.status ?? '—')}
+                                                                    {humanize(inspection.status ?? 'Not set')}
                                                                 </Badge>
                                                             </TableCell>
                                                             <TableCell className="whitespace-nowrap">
-                                                                {inspection.scheduled_at ?? '—'}
+                                                                {inspection.scheduled_at ?? 'Not set'}
                                                             </TableCell>
                                                             <TableCell>
-                                                                {inspection.inspector?.name ?? '—'}
+                                                                {inspection.inspector?.name ?? 'Not set'}
                                                             </TableCell>
                                                             <TableCell>
                                                                 <Badge variant="outline" className="capitalize">
-                                                                    {humanize(inspection.inspection_depth ?? '—')}
+                                                                    {humanize(inspection.inspection_depth ?? 'Not set')}
                                                                 </Badge>
                                                             </TableCell>
                                                             <TableCell>
@@ -301,7 +301,7 @@ export default function Index({
                                                                         ) : null}
                                                                     </span>
                                                                 ) : (
-                                                                    <span>—</span>
+                                                                    <span>None</span>
                                                                 )}
                                                             </TableCell>
                                                             <TableCell>

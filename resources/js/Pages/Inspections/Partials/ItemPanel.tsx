@@ -2,7 +2,7 @@
  * One item inside an area: its own Inertia form, its own save.
  *
  * The Vue page built a `useForm` per item inside a loop over the payload.
- * React's useForm is a hook, so it cannot run in a loop — each item gets a
+ * React's useForm is a hook, so it cannot run in a loop. Each item gets a
  * component instead, and this is where that one form lives. Writes still go
  * back one record at a time through the item's own SDK endpoint.
  */
@@ -55,7 +55,7 @@ export default function ItemPanel({
     };
 
     // Nothing saves as you type, and a closed panel hides whatever is pending
-    // inside it — so every level reports what it is holding. Inertia clears
+    // inside it, so every level reports what it is holding. Inertia clears
     // `isDirty` itself once a form's own save succeeds. The Vue page could read
     // every form out of one map; here the form belongs to the item, so the item
     // tells the area about it instead.
@@ -87,14 +87,14 @@ export default function ItemPanel({
                         <InputGroup>
                             <InputGroupAddon className="w-28 shrink-0">Condition</InputGroupAddon>
                             <Select value={form.data.condition} onValueChange={(value) => form.setData('condition', value)}>
-                                <SelectTrigger className="w-full rounded-none border-0 shadow-none focus:ring-0"><SelectValue placeholder="—" /></SelectTrigger>
+                                <SelectTrigger className="w-full rounded-none border-0 shadow-none focus:ring-0"><SelectValue placeholder="Not set" /></SelectTrigger>
                                 <SelectContent>{conditionOptions.map((c) => <SelectItem key={c} value={c} className="capitalize">{c}</SelectItem>)}</SelectContent>
                             </Select>
                         </InputGroup>
                         <InputGroup>
                             <InputGroupAddon className="w-28 shrink-0">Cleanliness</InputGroupAddon>
                             <Select value={form.data.cleanliness} onValueChange={(value) => form.setData('cleanliness', value)}>
-                                <SelectTrigger className="w-full rounded-none border-0 shadow-none focus:ring-0"><SelectValue placeholder="—" /></SelectTrigger>
+                                <SelectTrigger className="w-full rounded-none border-0 shadow-none focus:ring-0"><SelectValue placeholder="Not set" /></SelectTrigger>
                                 <SelectContent>{cleanlinessOptions.map((c) => <SelectItem key={c} value={c} className="capitalize">{c}</SelectItem>)}</SelectContent>
                             </Select>
                         </InputGroup>

@@ -10,8 +10,8 @@ const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
     // The glob hands back a whole module namespace, but Inertia's resolver
-    // types accept a component or a promise of one — not a promise of a
-    // module — so the default export is unwrapped here.
+    // types accept a component or a promise of one, not a promise of a
+    // module, so the default export is unwrapped here.
     resolve: async (name) => {
         const page = await resolvePageComponent(
             `./Pages/${name}.tsx`,

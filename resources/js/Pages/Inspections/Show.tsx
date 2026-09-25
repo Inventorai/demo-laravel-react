@@ -2,7 +2,7 @@
  * Inspection editor.
  *
  * Everything on this page arrives in the single GET /inspections/{id} call
- * made by InspectionController@show — areas, items, meters, keys, compliance
+ * made by InspectionController@show: areas, items, meters, keys, compliance
  * and asset checks all come from that one payload's `include`. Writes are the
  * opposite: each record type goes back through its own SDK resource, one
  * record at a time.
@@ -156,7 +156,7 @@ export default function Show({ inspection }: { inspection: Record<string, any> }
         // Markers only help while you are looking at the page; the guard covers
         // leaving it. The cards register their own counts (see useUnsavedGuard).
         <UnsavedGuard own={unsavedTotal}>
-            <Head title={`Edit — ${humanize(inspection.type ?? 'Inspection')}`} />
+            <Head title={`Edit: ${humanize(inspection.type ?? 'Inspection')}`} />
 
             {/* Photo lightbox */}
             <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
@@ -194,7 +194,7 @@ export default function Show({ inspection }: { inspection: Record<string, any> }
                             <h2 className="text-xl leading-tight font-semibold text-foreground capitalize">{humanize(inspection.type ?? 'Inspection')}</h2>
                             {inspection.property?.address && <p className="text-sm text-muted-foreground">{inspection.property.address.full_address}</p>}
                         </div>
-                        <Badge variant={inspection.status === 'completed' ? 'default' : 'secondary'} className="text-sm capitalize">{humanize(inspection.status ?? '—')}</Badge>
+                        <Badge variant={inspection.status === 'completed' ? 'default' : 'secondary'} className="text-sm capitalize">{humanize(inspection.status ?? 'Not set')}</Badge>
                     </div>
                 }
             >
@@ -214,10 +214,10 @@ export default function Show({ inspection }: { inspection: Record<string, any> }
                                         <div className="flex h-32 w-48 shrink-0 items-center justify-center rounded-lg bg-muted text-xs text-muted-foreground">No image</div>
                                     )}
                                     <div className="grid flex-1 grid-cols-2 gap-x-8 gap-y-3 text-sm sm:grid-cols-4">
-                                        <div><p className="text-muted-foreground">Date</p><p className="font-medium">{inspection.scheduled_at ?? '—'}</p></div>
-                                        <div><p className="text-muted-foreground">Inspector</p><p className="font-medium">{inspection.inspector?.name ?? '—'}</p></div>
-                                        <div><p className="text-muted-foreground">Type</p><p className="font-medium capitalize">{humanize(inspection.type ?? '—')}</p></div>
-                                        <div><p className="text-muted-foreground">Depth</p><p className="font-medium capitalize">{humanize(inspection.inspection_depth ?? '—')}</p></div>
+                                        <div><p className="text-muted-foreground">Date</p><p className="font-medium">{inspection.scheduled_at ?? 'Not set'}</p></div>
+                                        <div><p className="text-muted-foreground">Inspector</p><p className="font-medium">{inspection.inspector?.name ?? 'Not set'}</p></div>
+                                        <div><p className="text-muted-foreground">Type</p><p className="font-medium capitalize">{humanize(inspection.type ?? 'Not set')}</p></div>
+                                        <div><p className="text-muted-foreground">Depth</p><p className="font-medium capitalize">{humanize(inspection.inspection_depth ?? 'Not set')}</p></div>
                                         <div>
                                             <p className="text-muted-foreground">Defects</p>
                                             <p className="font-medium">
@@ -229,7 +229,7 @@ export default function Show({ inspection }: { inspection: Record<string, any> }
                                         <div><p className="text-muted-foreground">Areas</p><p className="font-medium">{areas.length}</p></div>
                                         <div>
                                             <p className="text-muted-foreground">Property</p>
-                                            <p className="flex items-center gap-1 font-medium"><MapPin className="h-3 w-3 shrink-0" />{inspection.property?.address?.line_1 ?? '—'}</p>
+                                            <p className="flex items-center gap-1 font-medium"><MapPin className="h-3 w-3 shrink-0" />{inspection.property?.address?.line_1 ?? 'Not set'}</p>
                                         </div>
                                     </div>
                                 </div>

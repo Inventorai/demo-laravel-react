@@ -94,6 +94,6 @@ echo "✓ synced $(wc -l < "$FILES" | tr -d ' ') shared files into $TARGET"
 # would catch that: vendor/ is untracked, so --check would still call the two in
 # sync while React ran against the old code. Install it now instead.
 if grep -q 'composer\.lock' <<< "$CHANGED"; then
-    echo "composer.lock changed — running composer install in $TARGET"
+    echo "composer.lock changed, running composer install in $TARGET"
     (cd "$TARGET" && composer install --no-interaction)
 fi

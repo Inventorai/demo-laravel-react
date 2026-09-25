@@ -6,7 +6,7 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
     // @unovis ships deep directory imports (e.g. '@unovis/ts/containers/xy-container').
     // Vite externalises dependencies in the SSR build, which hands those to Node's
-    // ESM loader — and it rejects directory imports outright, so the Dashboard fails
+    // ESM loader, and it rejects directory imports outright, so the Dashboard fails
     // to render server-side. Bundling the charts into the SSR output resolves them
     // with Vite's own resolver instead.
     ssr: {

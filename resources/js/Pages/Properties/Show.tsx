@@ -21,7 +21,7 @@ export default function Show({
     // Vue subscribed in onMounted and left the channel in onUnmounted; in React
     // both halves live in one effect so the channel is torn down with the page.
     // The id is read through a ref because Vue's handlers read the reactive
-    // `props.property.id` — putting it in the deps instead would leave and
+    // `props.property.id`, putting it in the deps instead would leave and
     // rejoin `team.{teamId}` on every property, and the layout listens there too.
     const propertyId = useRef<string>(property.id);
     propertyId.current = property.id;
@@ -124,7 +124,7 @@ export default function Show({
                                             typeof value !== 'object' || value === null ? (
                                                 <Fragment key={key}>
                                                     <div className="text-sm text-muted-foreground capitalize">{humanize(String(key))}</div>
-                                                    <div className="text-sm">{String(value ?? '—')}</div>
+                                                    <div className="text-sm">{String(value ?? 'Not set')}</div>
                                                 </Fragment>
                                             ) : null
                                         ))}
@@ -149,11 +149,11 @@ export default function Show({
                                                 <div>
                                                     <p className="text-sm font-medium capitalize">{humanize(inspection.type ?? `Inspection #${inspection.id}`)}</p>
                                                     <p className="text-xs text-muted-foreground">
-                                                        {inspection.scheduled_at ?? inspection.created_at ?? '—'}
+                                                        {inspection.scheduled_at ?? inspection.created_at ?? 'Not set'}
                                                     </p>
                                                 </div>
                                                 <Badge variant="secondary" className="capitalize">
-                                                    {humanize(inspection.status ?? '—')}
+                                                    {humanize(inspection.status ?? 'Not set')}
                                                 </Badge>
                                             </div>
                                         ))}

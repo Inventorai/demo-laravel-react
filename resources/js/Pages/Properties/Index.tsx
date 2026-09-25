@@ -249,13 +249,13 @@ export default function Index({
                                                                 )}
                                                             </TableCell>
                                                             <TableCell className="font-medium">
-                                                                {property.address?.line_1 ?? '—'}
+                                                                {property.address?.line_1 ?? 'Not set'}
                                                             </TableCell>
-                                                            <TableCell>{property.address?.city ?? '—'}</TableCell>
-                                                            <TableCell>{property.address?.postcode ?? '—'}</TableCell>
+                                                            <TableCell>{property.address?.city ?? 'Not set'}</TableCell>
+                                                            <TableCell>{property.address?.postcode ?? 'Not set'}</TableCell>
                                                             <TableCell>
                                                                 <Badge variant="secondary" className="capitalize">
-                                                                    {property.property_type ?? '—'}
+                                                                    {property.property_type ?? 'Not set'}
                                                                 </Badge>
                                                                 {property.is_hmo ? <Badge variant="outline" className="ml-1">HMO</Badge> : null}
                                                             </TableCell>

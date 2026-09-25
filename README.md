@@ -1,18 +1,18 @@
-# Inventorai Demo — Laravel + React
+# Inventorai Demo: Laravel + React
 
 A working demo app showing how to integrate the [Inventorai Laravel SDK](https://github.com/Inventorai/sdk-laravel) into a Laravel + React (Inertia) application.
 
-> Prefer Vue? The same app is available as [demo-laravel-vue](https://github.com/Inventorai/demo-laravel-vue). Both demos share an identical Laravel backend — only the frontend differs.
+> Prefer Vue? The same app is available as [demo-laravel-vue](https://github.com/Inventorai/demo-laravel-vue). Both demos share an identical Laravel backend. Only the frontend differs.
 
 ## What it demonstrates
 
-- **Properties** — List and view properties with addresses, images, and map pins
-- **Inspections** — Browse, filter, and edit inspections including areas, items, conditions, and cleanliness ratings
-- **Photo uploads** — Upload photos to inspection areas and items via the SDK
-- **Phrase autocomplete** — Search and select from pre-built phrase libraries when writing descriptions
-- **Real-time updates** — Listen for changes via WebSockets (Reverb) so the UI stays in sync
-- **API activity tracker** — See every SDK request in real time (method, endpoint, status, duration)
-- **Dashboard** — Property and inspection stats with charts
+- **Properties**: List and view properties with addresses, images, and map pins
+- **Inspections**: Browse, filter, and edit inspections including areas, items, conditions, and cleanliness ratings
+- **Photo uploads**: Upload photos to inspection areas and items via the SDK
+- **Phrase autocomplete**: Search and select from pre-built phrase libraries when writing descriptions
+- **Real-time updates**: Listen for changes via WebSockets (Reverb) so the UI stays in sync
+- **API activity tracker**: See every SDK request in real time (method, endpoint, status, duration)
+- **Dashboard**: Property and inspection stats with charts
 
 ## Requirements
 
@@ -54,7 +54,7 @@ You can generate a token from **Team Settings > API** in your [Inventorai dashbo
 
 ### 4. Set up the database
 
-The app uses SQLite by default — no database server needed.
+The app uses SQLite by default, so no database server needed.
 
 ```bash
 touch database/database.sqlite

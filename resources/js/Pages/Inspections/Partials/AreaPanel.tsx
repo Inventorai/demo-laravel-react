@@ -3,8 +3,7 @@
  *
  * The Vue page built a `useForm` per area inside `Object.fromEntries(...)`.
  * React's useForm is a hook, so the loop moved out here: one component per
- * area, one form each. The area also collects what its items are holding —
- * a closed item panel still has to show up on the area's own trigger — and
+ * area, one form each. The area also collects what its items are holding (a closed item panel still has to show up on the area's own trigger) and
  * reports the total to the page.
  */
 import { useCallback, useEffect, useState } from 'react';
@@ -74,7 +73,7 @@ export default function AreaPanel({
     };
 
     // Nothing saves as you type, and a closed panel hides whatever is pending
-    // inside it — so every level reports what it is holding. Inertia clears
+    // inside it, so every level reports what it is holding. Inertia clears
     // `isDirty` itself once a form's own save succeeds.
     const [dirtyItems, setDirtyItems] = useState<Record<string, boolean>>({});
 

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef } from 'react';
  * Calls `fn` only once the caller stops firing for `delay` ms.
  *
  * The callback is held in a ref so the debounced wrapper keeps a stable
- * identity across renders — otherwise every render would build a new timer
+ * identity across renders, otherwise every render would build a new timer
  * and nothing would ever be debounced.
  */
 export function useDebouncedCallback<A extends unknown[]>(

@@ -3,7 +3,7 @@
  *
  * Typing two or more characters hits GET /phrases/search through the app's
  * own proxy (see InspectionController@searchPhrases). Results come back
- * tagged with a subcategory — Condition, Cleanliness, Defects, Attributes —
+ * tagged with a subcategory (Condition, Cleanliness, Defects, Attributes)
  * so they are grouped rather than listed flat, and several can be ticked and
  * appended to the description in one go.
  */

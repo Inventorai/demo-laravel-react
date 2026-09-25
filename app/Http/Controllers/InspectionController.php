@@ -41,10 +41,10 @@ use Inventorai\SDK\Resources\MeterReadings;
  *
  * The show page also covers the four record types that sit alongside the
  * area/item tree, each with its own SDK resource:
- * - Meter readings   — gas, electricity, water; prepaid meters carry a balance
- * - Keys & fobs      — a typed count of what was handed over
- * - Compliance       — a snapshot of the team's forms, one response per field
- * - Asset checks     — alarms and safety equipment, tested per property asset
+ * - Meter readings:   gas, electricity, water; prepaid meters carry a balance
+ * - Keys & fobs:      a typed count of what was handed over
+ * - Compliance:       a snapshot of the team's forms, one response per field
+ * - Asset checks:     alarms and safety equipment, tested per property asset
  *
  * SDK errors are handled by the global exception handler in bootstrap/app.php.
  *
@@ -366,7 +366,7 @@ class InspectionController extends Controller
      * PATCH request to /inspections/{id}/compliance/fields/{fieldId}.
      *
      * The API types the stored value from the field's own field_type, so
-     * `value` is deliberately untyped here — a yes_no field wants a boolean,
+     * `value` is deliberately untyped here: a yes_no field wants a boolean,
      * a date field an ISO date string, a number field a number.
      *
      * The token needs the 'compliance:write' ability for this to work.

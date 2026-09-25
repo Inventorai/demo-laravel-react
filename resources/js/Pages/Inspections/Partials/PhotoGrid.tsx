@@ -1,8 +1,8 @@
 /**
  * Thumbnail grid with an upload tile in the first cell.
  *
- * The parent owns the upload request — every record type posts to its own
- * SDK endpoint — so this only hands back the chosen File.
+ * The parent owns the upload request (every record type posts to its own
+ * SDK endpoint), so this only hands back the chosen File.
  */
 import { type ChangeEvent } from 'react';
 import { Upload } from 'lucide-react';

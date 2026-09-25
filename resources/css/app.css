@@ -135,7 +135,7 @@
 /*
  * Unovis chart theming. Unovis injects its own light defaults on :root at
  * runtime (and only switches to its dark palette via `body.theme-dark`, which
- * we don't use), so these must be !important to win — and they reference theme
+ * we don't use), so these must be !important to win, and they reference theme
  * tokens, so they're correct in both light and dark automatically.
  */
 :root {

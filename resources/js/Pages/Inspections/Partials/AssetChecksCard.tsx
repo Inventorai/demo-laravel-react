@@ -1,5 +1,5 @@
 /**
- * Alarms & safety equipment — Inventorai::assetChecks().
+ * Alarms & safety equipment: Inventorai::assetChecks().
  *
  * Checks hang off the property's assets rather than off an inspection area,
  * so the API groups them by asset type (smoke alarm, CO alarm, and so on) and
@@ -113,7 +113,7 @@ export default function AssetChecksCard({
                                                         value={draft.tested}
                                                         onValueChange={(value) => setDraft(check.id, { tested: value })}
                                                     >
-                                                        <SelectTrigger className="w-full rounded-none border-0 shadow-none focus:ring-0"><SelectValue placeholder="—" /></SelectTrigger>
+                                                        <SelectTrigger className="w-full rounded-none border-0 shadow-none focus:ring-0"><SelectValue placeholder="Not set" /></SelectTrigger>
                                                         <SelectContent>
                                                             {testedOptions.map((o) => <SelectItem key={o} value={o} className="capitalize">{humanize(o)}</SelectItem>)}
                                                         </SelectContent>
@@ -125,7 +125,7 @@ export default function AssetChecksCard({
                                                         value={draft.test_result}
                                                         onValueChange={(value) => setDraft(check.id, { test_result: value })}
                                                     >
-                                                        <SelectTrigger className="w-full rounded-none border-0 shadow-none focus:ring-0"><SelectValue placeholder="—" /></SelectTrigger>
+                                                        <SelectTrigger className="w-full rounded-none border-0 shadow-none focus:ring-0"><SelectValue placeholder="Not set" /></SelectTrigger>
                                                         <SelectContent>
                                                             {resultOptions.map((o) => <SelectItem key={o} value={o} className="uppercase">{o}</SelectItem>)}
                                                         </SelectContent>
@@ -137,7 +137,7 @@ export default function AssetChecksCard({
                                                         value={draft.condition}
                                                         onValueChange={(value) => setDraft(check.id, { condition: value })}
                                                     >
-                                                        <SelectTrigger className="w-full rounded-none border-0 shadow-none focus:ring-0"><SelectValue placeholder="—" /></SelectTrigger>
+                                                        <SelectTrigger className="w-full rounded-none border-0 shadow-none focus:ring-0"><SelectValue placeholder="Not set" /></SelectTrigger>
                                                         <SelectContent>
                                                             {conditionOptions.map((o) => <SelectItem key={o} value={o} className="capitalize">{o}</SelectItem>)}
                                                         </SelectContent>

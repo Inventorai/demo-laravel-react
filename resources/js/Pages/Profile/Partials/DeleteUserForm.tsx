@@ -95,7 +95,7 @@ export default function DeleteUserForm({
                             so tailwind-merge let these overrides replace the default
                             variant's colours. React's wraps the primitive in
                             <Button asChild>, which only concatenates the two class
-                            lists, leaving bg-primary in place — so the destructive
+                            lists, leaving bg-primary in place, so the destructive
                             variant is asked for explicitly alongside the overrides. */}
                         <AlertDialogAction
                             variant="destructive"
