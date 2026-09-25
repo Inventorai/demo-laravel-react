@@ -13,9 +13,9 @@
  */
 
 use App\Models\User;
-use Inventorai\SDK\InventoraiClient;
-use Inventorai\SDK\Exceptions\AuthenticationException;
 use Inventorai\SDK\Exceptions\ApiException;
+use Inventorai\SDK\Exceptions\AuthenticationException;
+use Inventorai\SDK\InventoraiClient;
 use Inventorai\SDK\Resources\Properties;
 
 beforeEach(function () {
@@ -99,6 +99,18 @@ test('properties page passes property_type filter to API', function () {
 
     $this->actingAs($this->user)
         ->get('/properties?property_type=flat')
+        ->assertOk();
+});
+
+test('properties page passes is_hmo filter to API', function () {
+    $properties = mock(Properties::class);
+    $properties->shouldReceive('list')
+        ->withArgs(fn ($params) => ($params['filter']['is_hmo'] ?? null) === 'true')
+        ->andReturn(['data' => [], 'meta' => ['total' => 0, 'current_page' => 1, 'last_page' => 1]]);
+    mockProperties($properties);
+
+    $this->actingAs($this->user)
+        ->get('/properties?is_hmo=1')
         ->assertOk();
 });
 

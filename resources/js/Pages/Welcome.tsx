@@ -19,7 +19,7 @@ export default function Welcome({
                 <div className="w-full max-w-2xl space-y-8">
                     <div className="flex flex-col items-center gap-4">
                         <div>
-                            <img src="/images/logo/iai_logo.svg" alt="Inventorai" className="h-16 rounded-full" />
+                            <img src="/images/logo/iai_logo.svg?v=2" alt="Inventorai" className="h-16" />
                         </div>
                         <h1 className="text-3xl font-bold tracking-tight text-foreground">
                             Inventorai SDK Demo App

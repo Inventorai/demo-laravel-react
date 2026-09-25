@@ -95,6 +95,7 @@ export default function Show({
                                         </div>
                                         <div className="flex flex-wrap gap-2">
                                             <Badge variant="secondary" className="capitalize">{property.property_type}</Badge>
+                                            {property.is_hmo ? <Badge variant="outline">HMO</Badge> : null}
                                             <Badge variant={property.is_residential ? 'default' : 'outline'}>
                                                 {property.is_residential ? 'Residential' : 'Commercial'}
                                             </Badge>

@@ -8,7 +8,7 @@ export default function GuestLayout({ children }: { children: ReactNode }) {
         <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
             <div className="mb-6">
                 <Link href="/">
-                    <ApplicationLogo className="h-16 w-16 text-foreground rounded-lg" />
+                    <ApplicationLogo className="h-16 w-16 text-foreground" />
                 </Link>
             </div>
 

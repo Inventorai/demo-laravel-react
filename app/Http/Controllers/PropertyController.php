@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\ApiActivityTracker;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use App\Services\ApiActivityTracker;
-use Inventorai\Laravel\Facades\Inventorai;
 use Inertia\Inertia;
 use Inertia\Response;
+use Inventorai\Laravel\Facades\Inventorai;
+use Inventorai\SDK\Resources\Properties;
 
 /**
  * Demonstrates the Inventorai SDK's Properties resource.
@@ -21,7 +22,7 @@ use Inertia\Response;
  *
  * SDK errors are handled by the global exception handler in bootstrap/app.php.
  *
- * @see \Inventorai\SDK\Resources\Properties
+ * @see Properties
  */
 class PropertyController extends Controller
 {
@@ -30,7 +31,8 @@ class PropertyController extends Controller
      *
      * The Inventorai API supports server-side filtering via query parameters:
      * - filter[search]: searches across address_line_1, address_line_2, city, postcode
-     * - filter[property_type]: exact match (house, flat, bungalow, etc.)
+     * - filter[property_type]: exact match (flat, house, commercial, studio, land)
+     * - filter[is_hmo]: true or false
      *
      * Pagination is handled server-side with per_page (max 100) and page params.
      */
@@ -49,8 +51,11 @@ class PropertyController extends Controller
             $params['filter']['property_type'] = $request->input('property_type');
         }
 
-        $response = ApiActivityTracker::track('GET', '/properties', fn () =>
-            Inventorai::properties()->list($params)
+        if ($request->filled('is_hmo')) {
+            $params['filter']['is_hmo'] = $request->boolean('is_hmo') ? 'true' : 'false';
+        }
+
+        $response = ApiActivityTracker::track('GET', '/properties', fn () => Inventorai::properties()->list($params)
         );
 
         $properties = collect((array) ($response['data'] ?? []))->map(fn ($p) => $this->formatDates($p))->all();
@@ -58,7 +63,7 @@ class PropertyController extends Controller
         return Inertia::render('Properties/Index', [
             'properties' => $properties,
             'meta' => $response['meta'] ?? null,
-            'filters' => $request->only(['search', 'property_type', 'page']),
+            'filters' => $request->only(['search', 'property_type', 'is_hmo', 'page']),
             'teamId' => $this->teamId(),
         ]);
     }
@@ -71,18 +76,17 @@ class PropertyController extends Controller
      */
     public function show(string $id): Response
     {
-        $response = ApiActivityTracker::track('GET', "/properties/{$id}", fn () =>
-            Inventorai::properties()->get($id, ['include' => ['landlord', 'inspections']])
+        $response = ApiActivityTracker::track('GET', "/properties/{$id}", fn () => Inventorai::properties()->get($id, ['include' => ['landlord', 'inspections']])
         );
 
         $property = $response['data'] ?? $response;
         $property = $this->formatDates($property);
 
-        if (!empty($property['landlord']) && is_array($property['landlord'])) {
+        if (! empty($property['landlord']) && is_array($property['landlord'])) {
             $property['landlord'] = $this->formatDates($property['landlord']);
         }
 
-        if (!empty($property['inspections'])) {
+        if (! empty($property['inspections'])) {
             $property['inspections'] = collect((array) $property['inspections'])
                 ->map(fn ($i) => $this->formatDates($i))
                 ->all();
@@ -124,7 +128,7 @@ class PropertyController extends Controller
         $dateFields = ['created_at', 'updated_at', 'scheduled_at', 'completed_at', 'finalized_at'];
 
         foreach ($dateFields as $field) {
-            if (!empty($data[$field])) {
+            if (! empty($data[$field])) {
                 try {
                     $data[$field] = Carbon::parse($data[$field])->format('D j M Y');
                 } catch (\Exception) {

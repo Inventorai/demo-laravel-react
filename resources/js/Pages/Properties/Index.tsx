@@ -33,12 +33,14 @@ export default function Index({
 }) {
     const [search, setSearch] = useState<string>(filters?.search ?? '');
     const [propertyType, setPropertyType] = useState<string>(filters?.property_type ?? '');
+    const [isHmo, setIsHmo] = useState<string>(filters?.is_hmo ?? '');
     const [loading, setLoading] = useState(false);
 
     const applyFilters = useDebouncedCallback(() => {
         const params: Record<string, any> = {};
         if (search) params.search = search;
         if (propertyType) params.property_type = propertyType;
+        if (isHmo) params.is_hmo = isHmo;
 
         router.get(route('properties.index'), params, {
             preserveState: true,
@@ -60,11 +62,12 @@ export default function Index({
         }
 
         applyFilters();
-    }, [search, propertyType, applyFilters]);
+    }, [search, propertyType, isHmo, applyFilters]);
 
     const clearFilters = () => {
         setSearch('');
         setPropertyType('');
+        setIsHmo('');
         router.get(route('properties.index'), {}, {
             preserveState: true,
             onStart: () => setLoading(true),
@@ -76,6 +79,7 @@ export default function Index({
         const params: Record<string, any> = { page };
         if (search) params.search = search;
         if (propertyType) params.property_type = propertyType;
+        if (isHmo) params.is_hmo = isHmo;
 
         router.get(route('properties.index'), params, {
             preserveState: true,
@@ -150,17 +154,23 @@ export default function Index({
                                                     <SelectValue placeholder="Property type" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value="house">House</SelectItem>
                                                     <SelectItem value="flat">Flat</SelectItem>
-                                                    <SelectItem value="bungalow">Bungalow</SelectItem>
-                                                    <SelectItem value="maisonette">Maisonette</SelectItem>
-                                                    <SelectItem value="studio">Studio</SelectItem>
-                                                    <SelectItem value="room">Room</SelectItem>
+                                                    <SelectItem value="house">House</SelectItem>
                                                     <SelectItem value="commercial">Commercial</SelectItem>
-                                                    <SelectItem value="other">Other</SelectItem>
+                                                    <SelectItem value="studio">Studio</SelectItem>
+                                                    <SelectItem value="land">Land</SelectItem>
                                                 </SelectContent>
                                             </Select>
-                                            {(search || propertyType) ? (
+                                            <Select value={isHmo} onValueChange={setIsHmo}>
+                                                <SelectTrigger className="w-[120px]">
+                                                    <SelectValue placeholder="HMO" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="1">HMO</SelectItem>
+                                                    <SelectItem value="0">Not HMO</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                            {(search || propertyType || isHmo) ? (
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
@@ -178,7 +188,7 @@ export default function Index({
                                             <Home className="mx-auto h-12 w-12 text-muted-foreground" />
                                             <h3 className="mt-4 text-lg font-medium text-foreground">No properties found</h3>
                                             <p className="mt-2 text-sm text-muted-foreground">
-                                                {search || propertyType ? 'Try adjusting your filters.' : 'Properties from your Inventorai account will appear here.'}
+                                                {search || propertyType || isHmo ? 'Try adjusting your filters.' : 'Properties from your Inventorai account will appear here.'}
                                             </p>
                                         </div>
                                     ) : loading ? (
@@ -247,6 +257,7 @@ export default function Index({
                                                                 <Badge variant="secondary" className="capitalize">
                                                                     {property.property_type ?? '—'}
                                                                 </Badge>
+                                                                {property.is_hmo ? <Badge variant="outline" className="ml-1">HMO</Badge> : null}
                                                             </TableCell>
                                                             <TableCell>
                                                                 <Badge variant={property.is_residential ? 'default' : 'outline'}>

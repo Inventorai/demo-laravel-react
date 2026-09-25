@@ -65,7 +65,7 @@ export default function AuthenticatedLayout({
                 <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center gap-8">
                         <Link href={route('dashboard')}>
-                            <ApplicationLogo className="h-12 rounded-md" />
+                            <ApplicationLogo className="h-12" />
                         </Link>
 
                         <div className="hidden items-center gap-1 sm:flex">
