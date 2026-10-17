@@ -90,6 +90,48 @@ test('inspections page passes type filter to API', function () {
         ->assertOk();
 });
 
+test('inspections page passes group_by to the API and returns the groups', function () {
+    $inspections = mock(Inspections::class);
+    $inspections->shouldReceive('list')
+        ->withArgs(fn ($params) => ($params['group_by'] ?? null) === 'inspector')
+        ->andReturn([
+            'data' => [['id' => 'insp1']],
+            'grouped' => [[
+                'group_name' => 'Unassigned',
+                'count' => 3,
+                'showing_from' => 1,
+                'showing_to' => 3,
+                'continued' => false,
+                'inspections' => [['id' => 'insp1']],
+            ]],
+            'meta' => ['current_page' => 1, 'last_page' => 1, 'total_inspections' => 3, 'group_by' => 'inspector'],
+        ]);
+    mockInspections($inspections);
+
+    $this->actingAs($this->user)
+        ->get('/inspections?group_by=inspector')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('grouped.0.group_name', 'Unassigned')
+            ->where('grouped.0.inspections.0.id', 'insp1')
+            ->where('meta.total', 3)
+            ->where('filters.group_by', 'inspector')
+        );
+});
+
+test('inspections page ignores an unknown group_by', function () {
+    $inspections = mock(Inspections::class);
+    $inspections->shouldReceive('list')
+        ->withArgs(fn ($params) => ! isset($params['group_by']))
+        ->andReturn(['data' => [], 'meta' => ['total' => 0, 'current_page' => 1, 'last_page' => 1]]);
+    mockInspections($inspections);
+
+    $this->actingAs($this->user)
+        ->get('/inspections?group_by=status')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page->where('grouped', null));
+});
+
 test('inspections page redirects with error on auth failure', function () {
     $inspections = mock(Inspections::class);
     $inspections->shouldReceive('list')->andThrow(new AuthenticationException('Invalid token'));

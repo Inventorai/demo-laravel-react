@@ -160,3 +160,45 @@ test('property detail page renders with includes', function () {
             ->has('property')
         );
 });
+
+test('properties page passes group_by to the API and returns the groups', function () {
+    $properties = mock(Properties::class);
+    $properties->shouldReceive('list')
+        ->withArgs(fn ($params) => ($params['group_by'] ?? null) === 'branch')
+        ->andReturn([
+            'data' => [['id' => 'abc123', 'address' => ['line_1' => '1 High Street']]],
+            'grouped' => [[
+                'group_name' => 'Glasgow',
+                'count' => 30,
+                'showing_from' => 1,
+                'showing_to' => 25,
+                'continued' => false,
+                'properties' => [['id' => 'abc123', 'address' => ['line_1' => '1 High Street']]],
+            ]],
+            'meta' => ['current_page' => 1, 'last_page' => 2, 'total_properties' => 30, 'group_by' => 'branch'],
+        ]);
+    mockProperties($properties);
+
+    $this->actingAs($this->user)
+        ->get('/properties?group_by=branch')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('grouped.0.group_name', 'Glasgow')
+            ->where('grouped.0.properties.0.id', 'abc123')
+            ->where('meta.total', 30)
+            ->where('filters.group_by', 'branch')
+        );
+});
+
+test('properties page ignores an unknown group_by', function () {
+    $properties = mock(Properties::class);
+    $properties->shouldReceive('list')
+        ->withArgs(fn ($params) => ! isset($params['group_by']))
+        ->andReturn(['data' => [], 'meta' => ['total' => 0, 'current_page' => 1, 'last_page' => 1]]);
+    mockProperties($properties);
+
+    $this->actingAs($this->user)
+        ->get('/properties?group_by=landlord')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page->where('grouped', null));
+});

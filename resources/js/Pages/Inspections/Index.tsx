@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -18,17 +18,26 @@ import { Head, Link, router } from '@inertiajs/react';
 import { X, ClipboardCheck, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getEcho } from '@/lib/echo';
+import InspectorAvatar from '@/components/InspectorAvatar';
+import { useOnlineUsers } from '@/hooks/useOnlineUsers';
 
 const humanize = (value: string) => value.replace(/_/g, ' ');
 
+const ungroupedLabels: Record<string, string> = {
+    branch: 'No branch',
+    inspector: 'Unassigned',
+};
+
 export default function Index({
     inspections,
+    grouped,
     meta,
     filters,
     error,
     teamId,
 }: {
     inspections: Record<string, any>[];
+    grouped?: Record<string, any>[] | null;
     meta?: Record<string, any>;
     filters?: Record<string, any>;
     error?: string;
@@ -36,6 +45,10 @@ export default function Index({
 }) {
     const [status, setStatus] = useState<string>(filters?.status ?? '');
     const [type, setType] = useState<string>(filters?.type ?? '');
+    // "none" stands in for ungrouped because Radix Select rejects an empty
+    // item value; it is never sent, so the query string just omits group_by.
+    const [groupBy, setGroupBy] = useState<string>(filters?.group_by ?? 'none');
+    const onlineUsers = useOnlineUsers(teamId);
     const [loading, setLoading] = useState(false);
 
     // Live updates: the API broadcasts inspection changes on the team's private
@@ -47,7 +60,7 @@ export default function Index({
         const echo = getEcho();
         if (!echo || !teamId) return;
 
-        const refresh = () => router.reload({ only: ['inspections', 'meta'] });
+        const refresh = () => router.reload({ only: ['inspections', 'grouped', 'meta'] });
 
         echo.private(`team.${teamId}`)
             .listen('.inspection.created', refresh)
@@ -64,10 +77,11 @@ export default function Index({
     // Vue watched the two filter refs; React applies the visit straight from the
     // change handler with the incoming value, so there is no first-run visit and
     // no stale read of the state that is still being set.
-    const applyFilters = (nextStatus: string, nextType: string) => {
+    const applyFilters = (nextStatus: string, nextType: string, nextGroupBy: string) => {
         const params: Record<string, any> = {};
         if (nextStatus) params.status = nextStatus;
         if (nextType) params.type = nextType;
+        if (nextGroupBy !== 'none') params.group_by = nextGroupBy;
 
         router.get(route('inspections.index'), params, {
             preserveState: true,
@@ -80,6 +94,7 @@ export default function Index({
     const clearFilters = () => {
         setStatus('');
         setType('');
+        setGroupBy('none');
         router.get(route('inspections.index'), {}, {
             preserveState: true,
             onStart: () => setLoading(true),
@@ -91,6 +106,7 @@ export default function Index({
         const params: Record<string, any> = { page };
         if (status) params.status = status;
         if (type) params.type = type;
+        if (groupBy !== 'none') params.group_by = groupBy;
 
         router.get(route('inspections.index'), params, {
             preserveState: true,
@@ -99,6 +115,83 @@ export default function Index({
             onFinish: () => setLoading(false),
         });
     };
+
+    const renderRow = (inspection: Record<string, any>) => (
+        <TableRow key={inspection.id}>
+            <TableCell>
+                {inspection.property?.image ? (
+                    <img
+                        src={inspection.property.image}
+                        alt={inspection.property?.address?.line_1 ?? ''}
+                        className="h-8 w-8 rounded object-cover"
+                    />
+                ) : (
+                    <div className="h-8 w-8 rounded bg-muted" />
+                )}
+            </TableCell>
+            <TableCell>
+                <div className="font-medium">{inspection.property?.address?.line_1 ?? 'Not set'}</div>
+                <div className="text-xs text-muted-foreground">
+                    {[inspection.property?.address?.city, inspection.property?.address?.postcode].filter(Boolean).join(', ')}
+                </div>
+            </TableCell>
+            <TableCell>
+                <Badge variant="outline" className="capitalize">
+                    {humanize(inspection.type ?? 'Not set')}
+                </Badge>
+            </TableCell>
+            <TableCell>
+                <Badge
+                    variant={inspection.status === 'completed' ? 'default' : 'secondary'}
+                    className="capitalize"
+                >
+                    {humanize(inspection.status ?? 'Not set')}
+                </Badge>
+            </TableCell>
+            <TableCell className="whitespace-nowrap">
+                {inspection.scheduled_at ?? 'Not set'}
+            </TableCell>
+            <TableCell>
+                {inspection.inspector ? (
+                    <div className="flex items-center gap-2">
+                        <InspectorAvatar
+                            name={inspection.inspector.name}
+                            avatar={inspection.inspector.avatar}
+                            initials={inspection.inspector.initials}
+                            online={onlineUsers.has(String(inspection.inspector.id))}
+                        />
+                        {inspection.inspector.name}
+                    </div>
+                ) : 'Not set'}
+            </TableCell>
+            <TableCell>
+                <Badge variant="outline" className="capitalize">
+                    {humanize(inspection.inspection_depth ?? 'Not set')}
+                </Badge>
+            </TableCell>
+            <TableCell>
+                {inspection.statistics ? (
+                    <span>
+                        {inspection.statistics.total_defects}{' '}
+                        {inspection.statistics.critical_defects ? (
+                            <span className="text-red-500 text-xs">
+                                ({inspection.statistics.critical_defects} critical)
+                            </span>
+                        ) : null}
+                    </span>
+                ) : (
+                    <span>None</span>
+                )}
+            </TableCell>
+            <TableCell>
+                <Button variant="ghost" size="icon" asChild>
+                    <Link href={route('inspections.show', inspection.id)}>
+                        <Eye className="h-4 w-4" />
+                    </Link>
+                </Button>
+            </TableCell>
+        </TableRow>
+    );
 
     return (
         <>
@@ -132,7 +225,7 @@ export default function Index({
                                                 value={type}
                                                 onValueChange={(value) => {
                                                     setType(value);
-                                                    applyFilters(status, value);
+                                                    applyFilters(status, value, groupBy);
                                                 }}
                                             >
                                                 <SelectTrigger className="w-[180px]">
@@ -163,7 +256,7 @@ export default function Index({
                                                 value={status}
                                                 onValueChange={(value) => {
                                                     setStatus(value);
-                                                    applyFilters(value, type);
+                                                    applyFilters(value, type, groupBy);
                                                 }}
                                             >
                                                 <SelectTrigger className="w-[180px]">
@@ -176,7 +269,23 @@ export default function Index({
                                                     <SelectItem value="completed">Completed</SelectItem>
                                                 </SelectContent>
                                             </Select>
-                                            {(type || status) ? (
+                                            <Select
+                                                value={groupBy}
+                                                onValueChange={(value) => {
+                                                    setGroupBy(value);
+                                                    applyFilters(status, type, value);
+                                                }}
+                                            >
+                                                <SelectTrigger className="w-[150px]">
+                                                    <SelectValue placeholder="Group by" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="none">No grouping</SelectItem>
+                                                    <SelectItem value="branch">Branch</SelectItem>
+                                                    <SelectItem value="inspector">Inspector</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                            {(type || status || groupBy !== 'none') ? (
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
@@ -247,72 +356,38 @@ export default function Index({
                                                     </TableRow>
                                                 </TableHeader>
                                                 <TableBody>
-                                                    {inspections.map((inspection) => (
-                                                        <TableRow key={inspection.id}>
-                                                            <TableCell>
-                                                                {inspection.property?.image ? (
-                                                                    <img
-                                                                        src={inspection.property.image}
-                                                                        alt={inspection.property?.address?.line_1 ?? ''}
-                                                                        className="h-8 w-8 rounded object-cover"
-                                                                    />
-                                                                ) : (
-                                                                    <div className="h-8 w-8 rounded bg-muted" />
-                                                                )}
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                <div className="font-medium">{inspection.property?.address?.line_1 ?? 'Not set'}</div>
-                                                                <div className="text-xs text-muted-foreground">
-                                                                    {[inspection.property?.address?.city, inspection.property?.address?.postcode].filter(Boolean).join(', ')}
-                                                                </div>
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                <Badge variant="outline" className="capitalize">
-                                                                    {humanize(inspection.type ?? 'Not set')}
-                                                                </Badge>
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                <Badge
-                                                                    variant={inspection.status === 'completed' ? 'default' : 'secondary'}
-                                                                    className="capitalize"
-                                                                >
-                                                                    {humanize(inspection.status ?? 'Not set')}
-                                                                </Badge>
-                                                            </TableCell>
-                                                            <TableCell className="whitespace-nowrap">
-                                                                {inspection.scheduled_at ?? 'Not set'}
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                {inspection.inspector?.name ?? 'Not set'}
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                <Badge variant="outline" className="capitalize">
-                                                                    {humanize(inspection.inspection_depth ?? 'Not set')}
-                                                                </Badge>
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                {inspection.statistics ? (
-                                                                    <span>
-                                                                        {inspection.statistics.total_defects}{' '}
-                                                                        {inspection.statistics.critical_defects ? (
-                                                                            <span className="text-red-500 text-xs">
-                                                                                ({inspection.statistics.critical_defects} critical)
+                                                    {grouped ? grouped.map((group, index) => {
+                                                        // Groups carry no inspector id, so read it off the first row.
+                                                        const inspectorId = filters?.group_by === 'inspector'
+                                                            ? group.inspections[0]?.inspector?.id
+                                                            : null;
+
+                                                        return (
+                                                            <Fragment key={`${group.group_name ?? ''}-${index}`}>
+                                                                <TableRow className="bg-muted/50 hover:bg-muted/50">
+                                                                    <TableCell colSpan={9} className="font-medium">
+                                                                        <div className="flex items-center gap-2">
+                                                                            {inspectorId ? (
+                                                                                <InspectorAvatar
+                                                                                    name={group.group_name}
+                                                                                    avatar={group.avatar}
+                                                                                    initials={group.initials}
+                                                                                    online={onlineUsers.has(String(inspectorId))}
+                                                                                />
+                                                                            ) : null}
+                                                                            <span>
+                                                                                {group.group_name || ungroupedLabels[filters?.group_by] || 'Unassigned'} ({group.count})
+                                                                                {group.continued ? (
+                                                                                    <span className="ml-1 font-normal text-muted-foreground">(continued)</span>
+                                                                                ) : null}
                                                                             </span>
-                                                                        ) : null}
-                                                                    </span>
-                                                                ) : (
-                                                                    <span>None</span>
-                                                                )}
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                <Button variant="ghost" size="icon" asChild>
-                                                                    <Link href={route('inspections.show', inspection.id)}>
-                                                                        <Eye className="h-4 w-4" />
-                                                                    </Link>
-                                                                </Button>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    ))}
+                                                                        </div>
+                                                                    </TableCell>
+                                                                </TableRow>
+                                                                {group.inspections.map(renderRow)}
+                                                            </Fragment>
+                                                        );
+                                                    }) : inspections.map(renderRow)}
                                                 </TableBody>
                                             </Table>
 

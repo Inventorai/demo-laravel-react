@@ -27,12 +27,20 @@ use Inventorai\SDK\Resources\Properties;
 class PropertyController extends Controller
 {
     /**
+     * Groupings the list offers, matching the Group by dropdown.
+     *
+     * @var list<string>
+     */
+    private const GROUP_BY = ['branch'];
+
+    /**
      * List properties with optional search and property type filtering.
      *
      * The Inventorai API supports server-side filtering via query parameters:
      * - filter[search]: searches across address_line_1, address_line_2, city, postcode
      * - filter[property_type]: exact match (flat, house, commercial, studio, land)
      * - filter[is_hmo]: true or false
+     * - group_by: branch, returned as grouped[] alongside the flat data
      *
      * Pagination is handled server-side with per_page (max 100) and page params.
      */
@@ -55,15 +63,36 @@ class PropertyController extends Controller
             $params['filter']['is_hmo'] = $request->boolean('is_hmo') ? 'true' : 'false';
         }
 
+        // Grouping is done by the API, which orders the rows by group before
+        // paging them, so a page holds whole runs of a group rather than
+        // whatever 25 rows happened to land on it.
+        if (in_array($request->input('group_by'), self::GROUP_BY, true)) {
+            $params['group_by'] = $request->input('group_by');
+        }
+
         $response = ApiActivityTracker::track('GET', '/properties', fn () => Inventorai::properties()->list($params)
         );
 
         $properties = collect((array) ($response['data'] ?? []))->map(fn ($p) => $this->formatDates($p))->all();
 
+        $grouped = isset($params['group_by'])
+            ? collect((array) ($response['grouped'] ?? []))->map(fn ($group) => [
+                ...$group,
+                'properties' => collect((array) ($group['properties'] ?? []))->map(fn ($p) => $this->formatDates($p))->all(),
+            ])->all()
+            : null;
+
+        // A grouped response counts its rows in total_properties, not total.
+        $meta = $response['meta'] ?? null;
+        if (is_array($meta)) {
+            $meta['total'] ??= $meta['total_properties'] ?? null;
+        }
+
         return Inertia::render('Properties/Index', [
             'properties' => $properties,
-            'meta' => $response['meta'] ?? null,
-            'filters' => $request->only(['search', 'property_type', 'is_hmo', 'page']),
+            'grouped' => $grouped,
+            'meta' => $meta,
+            'filters' => $request->only(['search', 'property_type', 'is_hmo', 'group_by', 'page']),
             'teamId' => $this->teamId(),
         ]);
     }

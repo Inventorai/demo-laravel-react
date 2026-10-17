@@ -86,6 +86,13 @@ class InspectionController extends Controller
     ];
 
     /**
+     * Groupings the list offers, matching the Group by dropdown.
+     *
+     * @var list<string>
+     */
+    private const GROUP_BY = ['branch', 'inspector'];
+
+    /**
      * Key and fob types the API accepts on a keys-fobs record.
      *
      * @var list<string>
@@ -118,6 +125,13 @@ class InspectionController extends Controller
             ? $request->input('type')
             : implode(',', self::LISTED_TYPES);
 
+        // Grouping is done by the API, which orders the rows by group before
+        // paging them, so a page holds whole runs of a group rather than
+        // whatever 25 rows happened to land on it.
+        if (in_array($request->input('group_by'), self::GROUP_BY, true)) {
+            $params['group_by'] = $request->input('group_by');
+        }
+
         $response = ApiActivityTracker::track('GET', '/inspections', fn () => Inventorai::inspections()->list($params)
         );
 
@@ -125,10 +139,24 @@ class InspectionController extends Controller
             ->map(fn ($i) => $this->formatDates($i))
             ->all();
 
+        $grouped = isset($params['group_by'])
+            ? collect((array) ($response['grouped'] ?? []))->map(fn ($group) => [
+                ...$group,
+                'inspections' => collect((array) ($group['inspections'] ?? []))->map(fn ($i) => $this->formatDates($i))->all(),
+            ])->all()
+            : null;
+
+        // A grouped response counts its rows in total_inspections, not total.
+        $meta = $response['meta'] ?? null;
+        if (is_array($meta)) {
+            $meta['total'] ??= $meta['total_inspections'] ?? null;
+        }
+
         return Inertia::render('Inspections/Index', [
             'inspections' => $inspections,
-            'meta' => $response['meta'] ?? null,
-            'filters' => $request->only(['status', 'type', 'page']),
+            'grouped' => $grouped,
+            'meta' => $meta,
+            'filters' => $request->only(['status', 'type', 'group_by', 'page']),
             'teamId' => $this->teamId(),
         ]);
     }
