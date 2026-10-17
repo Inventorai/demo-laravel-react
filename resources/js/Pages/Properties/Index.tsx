@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -20,12 +20,14 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Index({
     properties,
+    grouped,
     meta,
     filters,
     teamId,
     error,
 }: {
     properties: Record<string, any>[];
+    grouped?: Record<string, any>[] | null;
     meta?: Record<string, any>;
     filters?: Record<string, any>;
     teamId?: string | null;
@@ -34,6 +36,9 @@ export default function Index({
     const [search, setSearch] = useState<string>(filters?.search ?? '');
     const [propertyType, setPropertyType] = useState<string>(filters?.property_type ?? '');
     const [isHmo, setIsHmo] = useState<string>(filters?.is_hmo ?? '');
+    // "none" stands in for ungrouped because Radix Select rejects an empty
+    // item value; it is never sent, so the query string just omits group_by.
+    const [groupBy, setGroupBy] = useState<string>(filters?.group_by ?? 'none');
     const [loading, setLoading] = useState(false);
 
     const applyFilters = useDebouncedCallback(() => {
@@ -41,6 +46,7 @@ export default function Index({
         if (search) params.search = search;
         if (propertyType) params.property_type = propertyType;
         if (isHmo) params.is_hmo = isHmo;
+        if (groupBy !== 'none') params.group_by = groupBy;
 
         router.get(route('properties.index'), params, {
             preserveState: true,
@@ -62,12 +68,13 @@ export default function Index({
         }
 
         applyFilters();
-    }, [search, propertyType, isHmo, applyFilters]);
+    }, [search, propertyType, isHmo, groupBy, applyFilters]);
 
     const clearFilters = () => {
         setSearch('');
         setPropertyType('');
         setIsHmo('');
+        setGroupBy('none');
         router.get(route('properties.index'), {}, {
             preserveState: true,
             onStart: () => setLoading(true),
@@ -80,6 +87,7 @@ export default function Index({
         if (search) params.search = search;
         if (propertyType) params.property_type = propertyType;
         if (isHmo) params.is_hmo = isHmo;
+        if (groupBy !== 'none') params.group_by = groupBy;
 
         router.get(route('properties.index'), params, {
             preserveState: true,
@@ -99,7 +107,7 @@ export default function Index({
         const echo = getEcho();
         if (!echo || !teamId) return;
 
-        const refresh = () => router.reload({ only: ['properties', 'meta'] });
+        const refresh = () => router.reload({ only: ['properties', 'grouped', 'meta'] });
 
         echo.private(`team.${teamId}`)
             .listen('.property.created', refresh)
@@ -111,6 +119,45 @@ export default function Index({
             echo.leave(`team.${teamId}`);
         };
     }, [teamId]);
+
+    const renderRow = (property: Record<string, any>) => (
+        <TableRow key={property.id}>
+            <TableCell>
+                {property.image ? (
+                    <img
+                        src={property.image}
+                        alt={property.address?.line_1 ?? ''}
+                        className="h-8 w-8 rounded object-cover"
+                    />
+                ) : (
+                    <div className="h-8 w-8 rounded bg-muted" />
+                )}
+            </TableCell>
+            <TableCell className="font-medium">
+                {property.address?.line_1 ?? 'Not set'}
+            </TableCell>
+            <TableCell>{property.address?.city ?? 'Not set'}</TableCell>
+            <TableCell>{property.address?.postcode ?? 'Not set'}</TableCell>
+            <TableCell>
+                <Badge variant="secondary" className="capitalize">
+                    {property.property_type ?? 'Not set'}
+                </Badge>
+                {property.is_hmo ? <Badge variant="outline" className="ml-1">HMO</Badge> : null}
+            </TableCell>
+            <TableCell>
+                <Badge variant={property.is_residential ? 'default' : 'outline'}>
+                    {property.is_residential ? 'Residential' : 'Commercial'}
+                </Badge>
+            </TableCell>
+            <TableCell>
+                <Button variant="ghost" size="icon" asChild>
+                    <Link href={route('properties.show', property.id)}>
+                        <Eye className="h-4 w-4" />
+                    </Link>
+                </Button>
+            </TableCell>
+        </TableRow>
+    );
 
     return (
         <>
@@ -170,7 +217,16 @@ export default function Index({
                                                     <SelectItem value="0">Not HMO</SelectItem>
                                                 </SelectContent>
                                             </Select>
-                                            {(search || propertyType || isHmo) ? (
+                                            <Select value={groupBy} onValueChange={setGroupBy}>
+                                                <SelectTrigger className="w-[150px]">
+                                                    <SelectValue placeholder="Group by" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="none">No grouping</SelectItem>
+                                                    <SelectItem value="branch">Branch</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                            {(search || propertyType || isHmo || groupBy !== 'none') ? (
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
@@ -235,44 +291,19 @@ export default function Index({
                                                     </TableRow>
                                                 </TableHeader>
                                                 <TableBody>
-                                                    {properties.map((property) => (
-                                                        <TableRow key={property.id}>
-                                                            <TableCell>
-                                                                {property.image ? (
-                                                                    <img
-                                                                        src={property.image}
-                                                                        alt={property.address?.line_1 ?? ''}
-                                                                        className="h-8 w-8 rounded object-cover"
-                                                                    />
-                                                                ) : (
-                                                                    <div className="h-8 w-8 rounded bg-muted" />
-                                                                )}
-                                                            </TableCell>
-                                                            <TableCell className="font-medium">
-                                                                {property.address?.line_1 ?? 'Not set'}
-                                                            </TableCell>
-                                                            <TableCell>{property.address?.city ?? 'Not set'}</TableCell>
-                                                            <TableCell>{property.address?.postcode ?? 'Not set'}</TableCell>
-                                                            <TableCell>
-                                                                <Badge variant="secondary" className="capitalize">
-                                                                    {property.property_type ?? 'Not set'}
-                                                                </Badge>
-                                                                {property.is_hmo ? <Badge variant="outline" className="ml-1">HMO</Badge> : null}
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                <Badge variant={property.is_residential ? 'default' : 'outline'}>
-                                                                    {property.is_residential ? 'Residential' : 'Commercial'}
-                                                                </Badge>
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                <Button variant="ghost" size="icon" asChild>
-                                                                    <Link href={route('properties.show', property.id)}>
-                                                                        <Eye className="h-4 w-4" />
-                                                                    </Link>
-                                                                </Button>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    ))}
+                                                    {grouped ? grouped.map((group, index) => (
+                                                        <Fragment key={`${group.group_name ?? ''}-${index}`}>
+                                                            <TableRow className="bg-muted/50 hover:bg-muted/50">
+                                                                <TableCell colSpan={7} className="font-medium">
+                                                                    {group.group_name || 'No branch'} ({group.count})
+                                                                    {group.continued ? (
+                                                                        <span className="ml-1 font-normal text-muted-foreground">(continued)</span>
+                                                                    ) : null}
+                                                                </TableCell>
+                                                            </TableRow>
+                                                            {group.properties.map(renderRow)}
+                                                        </Fragment>
+                                                    )) : properties.map(renderRow)}
                                                 </TableBody>
                                             </Table>
 
